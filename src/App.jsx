@@ -16,9 +16,9 @@ async function askAI(prompt, systemRole) {
   if (!key || key === 'your_openai_api_key_here' || key.length < 20) {
     await sleep(1300);
     if (systemRole.includes('Coder')) {
-      return "```typescript\nfunction routeToAgent(input: string): Agent {\n  const CODE_SIGNALS = /code|build|write|hook|component/i;\n  return CODE_SIGNALS.test(input)\n    ? agents.coder\n    : agents.architect;\n}\n```\nRuflo's dispatcher uses regex-based intent matching for O(1) routing with zero additional latency.";
+      return "```typescript\nfunction routeToAgent(input: string): Agent {\n  const CODE_SIGNALS = /code|build|write|hook|component/i;\n  return CODE_SIGNALS.test(input)\n    ? agents.coder\n    : agents.architect;\n}\n```\nRuflo dispatcher používá regex pro rozpoznání záměru — routing s nulovou extra latencí.";
     }
-    return "**Architecture Plan:**\n\n1. **Gateway Layer** — Normalizes input, extracts intent\n2. **Dispatcher** — Routes to the correct specialist agent\n3. **Context Bus** — Pruned state passed on each hand-off\n4. **Validators** — Output verification before response\n\nDecoupled agents enable horizontal scaling per workload type.";
+    return "**Plán architektury:**\n\n1. **Gateway** — Normalizuje vstup, extrahuje záměr\n2. **Dispatcher** — Routuje k správnému specialistovi\n3. **Context Bus** — Ořezaný stav předávaný při hand-off\n4. **Validátory** — Ověření výstupu před odpovědí\n\nOddělenými agenty dosáhneme horizontálního škálování."; 
   }
 
   const res = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -61,9 +61,9 @@ const AGENTS = {
   architect: {
     label: 'Architect',
     Icon: Brain,
-    tagline: 'High-level planning & design',
+    tagline: 'Návrh a plánování architektury',
     system:
-      'You are the Architect Agent in Ruflo, a multi-agent AI system. You design systems clearly, concisely, and with strategic insight. Keep responses under 120 words. Use markdown bold for key terms.',
+      'You are the Architect Agent in Ruflo, a multi-agent AI system. You design systems clearly, concisely, and with strategic insight. Keep responses under 120 words. Use markdown bold for key terms. Always respond in Czech.',
     textCls: 'text-violet-400',
     borderCls: 'border-violet-500/40',
     bgCls: 'bg-violet-500/10',
@@ -74,9 +74,9 @@ const AGENTS = {
   coder: {
     label: 'Coder',
     Icon: Code2,
-    tagline: 'Code implementation',
+    tagline: 'Implementace kódu',
     system:
-      'You are the Coder Agent in Ruflo, a multi-agent AI system. You provide clean, runnable code with brief explanations. Keep responses under 120 words. Use TypeScript when possible.',
+      'You are the Coder Agent in Ruflo, a multi-agent AI system. You provide clean, runnable code with brief explanations. Keep responses under 120 words. Use TypeScript when possible. Always respond in Czech.',
     textCls: 'text-blue-400',
     borderCls: 'border-blue-500/40',
     bgCls: 'bg-blue-500/10',
@@ -158,7 +158,7 @@ function TitleSlide() {
         </h1>
         <div className="w-24 h-px bg-gradient-to-r from-transparent via-violet-500 to-transparent mx-auto mb-6" />
         <p className="text-[32px] font-extralight text-gray-300 tracking-wide mb-14">
-          The Multi‑Agent Era
+          Éra multi-agentů
         </p>
 
         {/* Agent trio */}
@@ -183,17 +183,17 @@ function TitleSlide() {
         </div>
 
         <p className="text-xs font-mono text-gray-600 tracking-[0.25em]">
-          SWARM · CONTEXT PRUNING · ORCHESTRATION
+          SWARM · OŘEZÁNÍ KONTEXTU · ORCHESTRACE
         </p>
       </div>
 
       {/* Bottom hint */}
       <div className="absolute bottom-7 flex items-center gap-2 text-gray-600 text-xs font-mono">
-        Press
+        Stiskni
         <kbd className="px-1.5 py-0.5 border border-gray-700/80 rounded text-gray-500 text-[10px]">
           →
         </kbd>
-        to begin
+        pro začátek
       </div>
     </div>
   );
@@ -208,12 +208,12 @@ function ProblemSlide() {
       {/* Header */}
       <div className="mb-9">
         <span className="text-[11px] font-mono text-violet-400 tracking-widest uppercase">
-          Slide 01 — The Problem
+          Slide 01 — Problém
         </span>
         <h2 className="text-[42px] font-bold text-white mt-1 leading-tight">
           1×1 Chat vs. Swarm
         </h2>
-        <p className="text-gray-400 mt-1.5">Why a single conversation doesn't scale.</p>
+        <p className="text-gray-400 mt-1.5">Proč jeden chat nestačí.</p>
       </div>
 
       <div className="flex gap-7 flex-1 items-stretch">
@@ -224,18 +224,18 @@ function ProblemSlide() {
               <MessageSquare className="w-4 h-4 text-red-400" />
             </div>
             <div>
-              <p className="text-white font-semibold text-sm">Classic 1×1 Chat</p>
-              <p className="text-gray-500 text-xs">One model, one endless thread</p>
+              <p className="text-white font-semibold text-sm">Klasický 1×1 chat</p>
+              <p className="text-gray-500 text-xs">Jeden model, jedno nekonečné vlákno</p>
             </div>
           </div>
 
           {/* Linear chain */}
           <div className="flex-1 flex flex-col items-center justify-center gap-0">
             {[
-              { label: 'User Request',     warn: false },
-              { label: 'Growing Context',  warn: false },
-              { label: '⚠ Token Ceiling',  warn: true  },
-              { label: 'Single Response',  warn: false },
+              { label: 'Request',               warn: false },
+              { label: 'Narůstající kontext', warn: false },
+              { label: '⚠ Limit tokenů',      warn: true  },
+              { label: 'Jediná odpověď',      warn: false },
             ].map(({ label, warn }, i) => (
               <div key={i} className="flex flex-col items-center">
                 <div
@@ -254,10 +254,10 @@ function ProblemSlide() {
 
           <ul className="mt-6 space-y-2">
             {[
-              'No specialization per task',
-              'Context bloat degrades quality',
-              'Hard token limits block flow',
-              'Single point of failure',
+              'Žádná specializace na typ úkolu',
+              'Nafouklý kontext snižuje kvalitu',
+              'Limity tokenů blokují průběh',
+              'Jeden bod selhání',
             ].map((c) => (
               <li key={c} className="flex items-center gap-2 text-sm text-gray-500">
                 <span className="w-1 h-1 rounded-full bg-red-500/70 shrink-0" />
@@ -284,7 +284,7 @@ function ProblemSlide() {
             </div>
             <div>
               <p className="text-white font-semibold text-sm">Ruflo Swarm</p>
-              <p className="text-gray-500 text-xs">Orchestrated specialist agents</p>
+              <p className="text-gray-500 text-xs">Orchestrovaní specializovaní agenti</p>
             </div>
           </div>
 
@@ -333,10 +333,10 @@ function ProblemSlide() {
 
           <ul className="mt-4 space-y-2">
             {[
-              'Specialized agents per task type',
-              'Pruned context — no token bloat',
-              'Agents work in parallel',
-              'Horizontally scalable',
+              'Specializovaní agenti podle úkolu',
+              'Ořezaný kontext — žádné nafukování',
+              'Agenti pracují paralelně',
+              'Horizontálně škálovatelné',
             ].map((c) => (
               <li key={c} className="flex items-center gap-2 text-sm text-gray-400">
                 <span className="w-1 h-1 rounded-full bg-violet-400 shrink-0" />
@@ -371,7 +371,7 @@ function DemoSlide() {
   const [response, setResponse] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
-  const busy = ['analyzing', 'transferring', 'responding'].includes(phase);
+  const busy     = ['analyzing', 'transferring', 'responding'].includes(phase);
   const finished = phase === 'done' || phase === 'error';
 
   async function run() {
@@ -381,19 +381,19 @@ function DemoSlide() {
     setResponse('');
     setAgent(null);
     setErrorMsg('');
-    setStatusMsg('Analyzing intent…');
+    setStatusMsg('Analyzuju záměr…');
 
     await sleep(700);
 
     const chosen = dispatchAgent(input);
     setAgent(chosen);
     setPhase('transferring');
-    setStatusMsg(`Handing off to ${AGENTS[chosen].label} Agent…`);
+    setStatusMsg(`Předávám ${AGENTS[chosen].label} agentovi…`);
 
-    await sleep(2000); // ← 2-second hand-off animation
+    await sleep(2000);
 
     setPhase('responding');
-    setStatusMsg(`${AGENTS[chosen].label} Agent is responding…`);
+    setStatusMsg(`${AGENTS[chosen].label} agent odpovídá…`);
 
     try {
       const text = await askAI(input, AGENTS[chosen].system);
@@ -423,13 +423,13 @@ function DemoSlide() {
       {/* Header */}
       <div className="mb-7 shrink-0">
         <span className="text-[11px] font-mono text-violet-400 tracking-widest uppercase">
-          Slide 02 — Interactive Demo
+          Slide 02 — Interaktivní demo
         </span>
         <h2 className="text-[42px] font-bold text-white mt-1 leading-tight">
-          The Swarm in Action
+          Roj v akci
         </h2>
         <p className="text-gray-400 mt-1.5">
-          Ask anything — the Dispatcher decides which agent answers.
+          Zeptej se na cokoliv — Dispatcher rozhodne, kdo odpoví.
         </p>
       </div>
 
@@ -498,7 +498,7 @@ function DemoSlide() {
                 ? <Loader2 className="w-4 h-4 animate-spin" />
                 : finished
                   ? <><RotateCcw className="w-4 h-4" /> Reset</>
-                  : <><Send className="w-4 h-4" /> Ask</>
+                  : <><Send className="w-4 h-4" /> Odeslat</>
               }
             </button>
           </div>
@@ -537,7 +537,7 @@ function DemoSlide() {
                 <>
                   <div className={`flex items-center gap-2 mb-4 text-[11px] font-mono ${A?.textCls} uppercase tracking-widest`}>
                     {A && <A.Icon className="w-3.5 h-3.5" />}
-                    {A?.label} Agent Response
+                    {A?.label} · odpověď
                   </div>
                   <SimpleMarkdown text={response} />
                 </>
@@ -551,10 +551,10 @@ function DemoSlide() {
           {/* Dispatch logic */}
           <div className="border border-gray-700/60 rounded-xl p-4 bg-gray-900/40">
             <p className="text-gray-500 text-[10px] font-mono uppercase tracking-widest mb-3">
-              Dispatch Logic
+              Logika dispatcheru
             </p>
             <div className="space-y-2 text-xs font-mono">
-              <div className="text-gray-600">if input contains:</div>
+              <div className="text-gray-600">pokud vstup obsahuje:</div>
               <div className="flex flex-wrap gap-1">
                 {CODE_KEYWORDS.map((k) => (
                   <span
@@ -570,10 +570,10 @@ function DemoSlide() {
                 ))}
               </div>
               <div className={`transition-colors duration-300 ${agent === 'coder' ? 'text-blue-400' : 'text-gray-700'}`}>
-                → Coder Agent
+                → Coder agent
               </div>
               <div className={`transition-colors duration-300 ${agent === 'architect' ? 'text-violet-400' : 'text-gray-700'}`}>
-                else → Architect Agent
+                jinak → Architect agent
               </div>
             </div>
           </div>
@@ -581,25 +581,25 @@ function DemoSlide() {
           {/* Hand-off log */}
           <div className="flex-1 border border-gray-700/60 rounded-xl p-4 bg-gray-900/40">
             <p className="text-gray-500 text-[10px] font-mono uppercase tracking-widest mb-3">
-              Hand-off Log
+              Log předání
             </p>
             <div className="space-y-2.5">
               {phase === 'idle' ? (
-                <p className="text-[11px] font-mono text-gray-700">Awaiting input…</p>
+                <p className="text-[11px] font-mono text-gray-700">Čekám na vstup…</p>
               ) : (
                 <>
-                  <LogLine done text="Intent parsed" />
+                  <LogLine done text="Záměr rozpoznán" />
                   <LogLine
                     done={agent !== null}
-                    text={agent ? `→ ${AGENTS[agent].label} selected` : 'Selecting agent…'}
+                    text={agent ? `→ ${AGENTS[agent].label} vybrán` : 'Vybírám agenta…'}
                   />
                   <LogLine
                     done={['responding', 'done', 'error'].includes(phase)}
-                    text="Context pruned"
+                    text="Kontext ořezán"
                   />
                   <LogLine
                     done={phase === 'done' || phase === 'error'}
-                    text="Response received"
+                    text="Odpověď přijata"
                   />
                 </>
               )}
@@ -615,21 +615,21 @@ function DemoSlide() {
 // SLIDE 4 — Context Pruning
 // ═════════════════════════════════════════════════════════════════════════════
 const RAW_CONTEXT = [
-  { role: 'user', preview: "What's the weather in NYC?",              tokens: 9    },
-  { role: 'ai',   preview: "I don't have real-time data…",            tokens: 28   },
-  { role: 'user', preview: "Help me plan my React app.",              tokens: 11   },
-  { role: 'ai',   preview: "Sure! Tell me your requirements…",        tokens: 19   },
-  { role: 'user', preview: "Actually — design a multi-agent system.", tokens: 14   },
-  { role: 'ai',   preview: "For multi-agent architecture, consider…", tokens: 312  },
-  { role: 'user', preview: "[Pasted 800-line codebase]",              tokens: 1840 },
-  { role: 'ai',   preview: "Based on your code, the key issues are…", tokens: 547  },
+  { role: 'user', preview: "Jaké je počasí v New Yorku?",                 tokens: 9    },
+  { role: 'ai',   preview: "Nemám přístup k aktuálním datům…",            tokens: 28   },
+  { role: 'user', preview: "Pomož mi naplánovat React aplikaci.",         tokens: 11   },
+  { role: 'ai',   preview: "Jasně! Řekni mi svoje požadavky…",            tokens: 19   },
+  { role: 'user', preview: "Vlastně — navrhni multi-agentní systém.",     tokens: 14   },
+  { role: 'ai',   preview: "Pro multi-agentní architekturu zvaž…",        tokens: 312  },
+  { role: 'user', preview: "[Vložen 800-řádkový kód]",                    tokens: 1840 },
+  { role: 'ai',   preview: "Na základě tvého kódu jsou hlavní problémy…", tokens: 547  },
 ];
 
 const CLEAN_CONTEXT_FIELDS = [
-  { key: 'task',         value: '"Design multi-agent system"',         isArray: false },
-  { key: 'constraints',  value: ['TypeScript', 'React', 'Low latency'], isArray: true  },
-  { key: 'lastDecision', value: '"Use event-driven dispatch"',          isArray: false },
-  { key: 'nextAgent',    value: '"Architect"',                          isArray: false },
+  { key: 'task',         value: '"Navrhni multi-agentní systém"',         isArray: false },
+  { key: 'constraints',  value: ['TypeScript', 'React', 'Nízká latence'], isArray: true  },
+  { key: 'lastDecision', value: '"Použij event-driven dispatch"',         isArray: false },
+  { key: 'nextAgent',    value: '"Architect"',                            isArray: false },
 ];
 
 const TOTAL_RAW = RAW_CONTEXT.reduce((s, i) => s + i.tokens, 0);
@@ -649,13 +649,13 @@ function ContextPruningSlide() {
       {/* Header */}
       <div className="mb-8 shrink-0">
         <span className="text-[11px] font-mono text-violet-400 tracking-widest uppercase">
-          Slide 03 — Architecture
+          Slide 03 — Architektura
         </span>
         <h2 className="text-[42px] font-bold text-white mt-1 leading-tight">
           Context Pruning
         </h2>
         <p className="text-gray-400 mt-1.5">
-          How Ruflo prevents token bloat between every agent hand-off.
+          Jak Ruflo zabraňuje nafukování tokenů při každém předání.
         </p>
       </div>
 
@@ -664,7 +664,7 @@ function ContextPruningSlide() {
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex items-center justify-between mb-3 shrink-0">
             <span className="text-[11px] font-mono text-gray-500 uppercase tracking-widest">
-              Raw Context
+              Surový kontext
             </span>
             <span
               className={`text-[11px] font-mono transition-all duration-700
@@ -723,7 +723,7 @@ function ContextPruningSlide() {
             className={`text-[10px] font-mono uppercase tracking-widest transition-colors duration-500
               ${phase === 1 ? 'text-amber-400' : phase === 2 ? 'text-green-400' : 'text-gray-600'}`}
           >
-            {phase === 1 ? 'Pruning…' : phase === 2 ? 'Done ✓' : 'Pruner'}
+            {phase === 1 ? 'Ořezávám…' : phase === 2 ? 'Hotovo ✓' : 'Pruner'}
           </span>
           <div className="w-px h-10 bg-gray-800" />
           <button
@@ -737,7 +737,7 @@ function ContextPruningSlide() {
                   : 'border-violet-500/40 bg-violet-500/10 text-violet-400 hover:bg-violet-500/20 cursor-pointer'
               }`}
           >
-            {phase === 2 ? 'Reset' : phase === 1 ? '…' : 'Run Pruner'}
+            {phase === 2 ? 'Reset' : phase === 1 ? '…' : 'Spustit'}
           </button>
         </div>
 
@@ -745,7 +745,7 @@ function ContextPruningSlide() {
         <div className="flex-1 flex flex-col min-h-0">
           <div className="flex items-center justify-between mb-3 shrink-0">
             <span className="text-[11px] font-mono text-gray-500 uppercase tracking-widest">
-              Pruned Context
+              Ořezaný kontext
             </span>
             <span
               className={`text-[11px] font-mono transition-all duration-700
@@ -798,11 +798,11 @@ function ContextPruningSlide() {
                 <div className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shrink-0" />
                   <span className="text-green-400 text-[10px] uppercase tracking-widest">
-                    Ready for hand-off
+                    Připraveno k předání
                   </span>
                 </div>
                 <p className="text-gray-600 text-[10px] mt-1.5 leading-relaxed">
-                  97% token reduction · full intent preserved
+                  97 % méně tokenů · záměr zachován
                 </p>
               </div>
             )}
@@ -857,7 +857,7 @@ function ThankYouSlide() {
         </h1>
         <div className="w-24 h-px bg-gradient-to-r from-transparent via-violet-500 to-transparent mx-auto mb-5" />
         <p className="text-lg font-light text-gray-400 mb-12 max-w-lg">
-          Ruflo is open-source — all credit goes to the creator. Star it, fork it, build with it.
+          Ruflo je open-source — všechna čest patří tvůrci. Hvězdičkuj, forkuj, postav na tom něco svého.
         </p>
 
         {/* GitHub link card */}
@@ -886,7 +886,7 @@ function ThankYouSlide() {
             <p className="text-white font-semibold text-sm group-hover:text-violet-300 transition-colors">
               github.com/ruvnet/ruflo
             </p>
-            <p className="text-gray-500 text-xs mt-0.5">Open-source · MIT License</p>
+            <p className="text-gray-500 text-xs mt-0.5">Open-source · MIT licence</p>
           </div>
           <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-violet-400 group-hover:translate-x-1 transition-all ml-2" />
         </a>
@@ -896,7 +896,7 @@ function ThankYouSlide() {
 }
 
 const SLIDES = [TitleSlide, ProblemSlide, DemoSlide, ContextPruningSlide, ThankYouSlide];
-const SLIDE_LABELS = ['Intro', 'Problem', 'Demo', 'Context Pruning', 'Thanks'];
+const SLIDE_LABELS = ['Úvod', 'Problém', 'Demo', 'Context Pruning', 'Dotazy'];
 
 // ═════════════════════════════════════════════════════════════════════════════
 // MAIN APP
