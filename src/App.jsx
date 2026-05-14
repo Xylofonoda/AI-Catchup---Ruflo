@@ -9,12 +9,16 @@ import {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ─── OpenAI fetch helper ──────────────────────────────────────────────────────
-async function askAI(prompt, systemRole) {
+async function askAI(prompt, systemRole, extraMessages = []) {
   const key = import.meta.env.VITE_OPENAI_API_KEY;
 
   // Demo / offline fallback
   if (!key || key === 'your_openai_api_key_here' || key.length < 20) {
     await sleep(1300);
+    if (extraMessages.length > 0) {
+      // Handoff mock — Coder implementing Architect's prior design
+      return "```typescript\nclass ContextBus {\n  private state = new Map<string, unknown>();\n\n  handOff(from: string, to: string, data: unknown) {\n    this.state.set(`${from}→${to}`, data);\n  }\n\n  receive(key: string): unknown {\n    return this.state.get(key);\n  }\n}\n\nconst bus = new ContextBus();\nbus.handOff('architect', 'coder', design);\n```\nPřímá implementace plánu Architect agenta — kontext předán přes **Context Bus**.";
+    }
     if (systemRole.includes('Coder')) {
       return "```typescript\nfunction routeToAgent(input: string): Agent {\n  const CODE_SIGNALS = /code|build|write|hook|component/i;\n  return CODE_SIGNALS.test(input)\n    ? agents.coder\n    : agents.architect;\n}\n```\nRuflo dispatcher používá regex pro rozpoznání záměru — routing s nulovou extra latencí.";
     }
@@ -31,6 +35,7 @@ async function askAI(prompt, systemRole) {
       model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: systemRole },
+        ...extraMessages,
         { role: 'user', content: prompt },
       ],
       max_tokens: 300,
@@ -63,7 +68,7 @@ const AGENTS = {
     Icon: Brain,
     tagline: 'Návrh a plánování architektury',
     system:
-      'You are the Architect Agent in Ruflo, a multi-agent AI system. You design systems clearly, concisely, and with strategic insight. Keep responses under 120 words. Use markdown bold for key terms. Always respond in Czech.',
+      'You are the Architect Agent in Ruflo, a multi-agent AI system. You design systems clearly, concisely, and with strategic insight. Keep responses under 120 words. Use markdown bold for key terms. Never output code blocks or code snippets — use plain text and bullet points only. Always respond in Czech.',
     textCls: 'text-violet-400',
     borderCls: 'border-violet-500/40',
     bgCls: 'bg-violet-500/10',
@@ -416,6 +421,38 @@ function DemoSlide() {
     setErrorMsg('');
   }
 
+  async function handoff() {
+    if (busy) return;
+    const architectDesign = response;
+    setPhase('analyzing');
+    setResponse('');
+    setAgent(null);
+    setErrorMsg('');
+    setStatusMsg('Předávám Coder agentovi…');
+    await sleep(700);
+    setAgent('coder');
+    setPhase('transferring');
+    setStatusMsg('Předávám Coder agentovi…');
+    await sleep(2000);
+    setPhase('responding');
+    setStatusMsg('Coder agent odpovídá…');
+    try {
+      const text = await askAI(
+        'Implement the above design as clean TypeScript code.',
+        AGENTS.coder.system,
+        [{ role: 'assistant', content: architectDesign }],
+      );
+      setResponse(text);
+      setPhase('done');
+      setStatusMsg('');
+    } catch (e) {
+      setErrorMsg(e.message);
+      setPhase('error');
+      setStatusMsg('');
+    }
+  }
+
+  const canHandoff = phase === 'done' && agent === 'architect';
   const A = agent ? AGENTS[agent] : null;
 
   return (
@@ -475,7 +512,7 @@ function DemoSlide() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
-                  finished ? reset() : run();
+                  canHandoff ? handoff() : finished ? reset() : run();
                 }
               }}
               disabled={busy || finished}
@@ -485,22 +522,41 @@ function DemoSlide() {
                 focus:outline-none focus:ring-1 focus:ring-violet-500/60 focus:border-violet-500/60
                 disabled:opacity-50 transition-all"
             />
-            <button
-              onClick={finished ? reset : run}
-              disabled={busy || (!input.trim() && !finished)}
-              className={`px-5 py-3 rounded-xl text-sm font-medium flex items-center gap-2 shrink-0 transition-all
-                ${finished
-                  ? 'bg-gray-700/60 hover:bg-gray-700 text-gray-300 border border-gray-600'
-                  : 'bg-violet-600 hover:bg-violet-500 text-white disabled:opacity-40 disabled:cursor-not-allowed'
-                }`}
-            >
-              {busy
-                ? <Loader2 className="w-4 h-4 animate-spin" />
-                : finished
-                  ? <><RotateCcw className="w-4 h-4" /> Reset</>
-                  : <><Send className="w-4 h-4" /> Odeslat</>
-              }
-            </button>
+            {canHandoff ? (
+              <>
+                <button
+                  onClick={handoff}
+                  className="px-5 py-3 rounded-xl text-sm font-medium flex items-center gap-2 shrink-0 transition-all
+                    bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white"
+                >
+                  <ArrowRight className="w-4 h-4" /> Implement it
+                </button>
+                <button
+                  onClick={reset}
+                  className="px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 shrink-0 transition-all
+                    bg-gray-700/60 hover:bg-gray-700 text-gray-300 border border-gray-600"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={finished ? reset : run}
+                disabled={busy || (!input.trim() && !finished)}
+                className={`px-5 py-3 rounded-xl text-sm font-medium flex items-center gap-2 shrink-0 transition-all
+                  ${finished
+                    ? 'bg-gray-700/60 hover:bg-gray-700 text-gray-300 border border-gray-600'
+                    : 'bg-violet-600 hover:bg-violet-500 text-white disabled:opacity-40 disabled:cursor-not-allowed'
+                  }`}
+              >
+                {busy
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : finished
+                    ? <><RotateCcw className="w-4 h-4" /> Reset</>
+                    : <><Send className="w-4 h-4" /> Odeslat</>
+                }
+              </button>
+            )}
           </div>
 
           {/* Status pill */}
